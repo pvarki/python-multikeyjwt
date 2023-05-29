@@ -3,6 +3,7 @@ from typing import Optional, Any, Dict, MutableSequence
 from dataclasses import dataclass, field
 from pathlib import Path
 import functools
+import logging
 
 import jwt as pyJWT  # too easy to accidentally override the module
 from cryptography.hazmat.primitives import serialization
@@ -12,6 +13,8 @@ from cryptography.hazmat.backends import default_backend
 
 from .common import JWTVerifierConfig
 from ..config import ENVCONFIG
+
+LOGGER = logging.getLogger(__name__)
 
 
 @dataclass
@@ -34,9 +37,13 @@ class Verifier:
             for fpth in self.pubkeypath.iterdir():
                 if not fpth.is_file():
                     continue
+                if not fpth.name.endswith(".pub"):
+                    continue
+                LOGGER.debug("Loading key {}".format(fpth))
                 with fpth.open("rb") as fpntr:
                     self.pubkeys.append(serialization.load_pem_public_key(fpntr.read(), backend=default_backend()))
         else:
+            LOGGER.info("Loading key {}".format(self.pubkeypath))
             with self.pubkeypath.open("rb") as fpntr:
                 self.pubkeys = [serialization.load_pem_public_key(fpntr.read(), backend=default_backend())]
 
