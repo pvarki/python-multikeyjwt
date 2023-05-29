@@ -7,7 +7,7 @@ import logging
 
 import jwt as pyJWT  # too easy to accidentally override the module
 from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.primitives.asymmetric.types import PUBLIC_KEY_TYPES
+from cryptography.hazmat.primitives.asymmetric.types import PublicKeyTypes
 from cryptography.hazmat.backends import default_backend
 
 
@@ -26,7 +26,7 @@ class Verifier:
     pubkeypath: Path = field(default_factory=functools.partial(ENVCONFIG, "JWT_PUBKEY_PATH", cast=Path))
 
     # Non-init public props
-    pubkeys: MutableSequence[PUBLIC_KEY_TYPES] = field(init=False)
+    pubkeys: MutableSequence[PublicKeyTypes] = field(init=False)
 
     def __post_init__(self) -> None:
         """Read the keys"""

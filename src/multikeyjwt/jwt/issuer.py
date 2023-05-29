@@ -8,7 +8,7 @@ import pendulum
 from libadvian.binpackers import ensure_utf8
 import jwt as pyJWT  # too easy to accidentally override the module
 from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.primitives.asymmetric.types import PRIVATE_KEY_TYPES
+from cryptography.hazmat.primitives.asymmetric.types import PrivateKeyTypes
 from cryptography.hazmat.backends import default_backend
 
 
@@ -27,7 +27,7 @@ class Issuer:
     )
 
     # Private props
-    _privkey: PRIVATE_KEY_TYPES = field(init=False, repr=False)
+    _privkey: PrivateKeyTypes = field(init=False, repr=False)
 
     def __post_init__(self) -> None:
         """Read the keys"""
