@@ -7,7 +7,19 @@ try:
     from starlette.config import Config
     from starlette.datastructures import Secret
 
-    ENVCONFIG = Config(".env")
+    _CONFIG = Config(".env")
+
+    def starlette_config_wrapper(
+        key: str,
+        default: typing.Optional[str] = None,
+        cast: typing.Optional[typing.Callable[[typing.Any], typing.Any]] = None,
+    ) -> typing.Any:
+        """Wrap starlettes config to keep type-checking sane with the missing starlette -case"""
+        if cast:
+            return _CONFIG(key, default=default, cast=cast)
+        return _CONFIG(key, default=default)
+
+    ENVCONFIG = starlette_config_wrapper
 except ImportError:
     # Vendor the Secret from starlette
     class Secret:  # type: ignore
@@ -30,7 +42,9 @@ except ImportError:
             return bool(self._value)
 
     def config_wrapper(
-        key: str, default: typing.Optional[str] = None, cast: typing.Optional[typing.Callable[..., typing.Any]] = None
+        key: str,
+        default: typing.Optional[str] = None,
+        cast: typing.Optional[typing.Callable[[typing.Any], typing.Any]] = None,
     ) -> typing.Any:
         """quick wrapper for os.getenv for users that do not have Starlette"""
         val = os.getenv(key, default=default)
