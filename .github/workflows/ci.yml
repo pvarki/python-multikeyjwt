@@ -5,8 +5,9 @@ jobs:
   Build-On-Ubuntu:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out repository code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v3
+      - uses: pre-commit/action@v3.0.0
       - name: List files in the repository
         run: ls ${{ github.workspace }}
       - run: docker build --ssh default --target tox -t multikeyjwt:tox .
