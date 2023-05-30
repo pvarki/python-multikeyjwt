@@ -5,19 +5,22 @@ jobs:
   Build-On-Alpine:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
       - uses: jirutka/setup-alpine@v1
         with:
           branch: v3.15
         
       - run: cat /etc/alpine-release
         shell: alpine.sh {0}
+      - run: docker build --ssh default --target devel_shell -t multikeyjwt:devel_shell .
+        shell: alpine.sh {0}
 
-  Build-On-Debian:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: jtdor/build-deb-action@v1
-        env:
-          DEB_BUILD_OPTIONS: noautodbgsym
-        with:
-          buildpackage-opts: --build=binary --no-sign
+#  Build-On-Debian:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v3
+#      - uses: jtdor/build-deb-action@v1
+#        env:
+#          DEB_BUILD_OPTIONS: noautodbgsym
+#        with:
+#          buildpackage-opts: --build=binary --no-sign
