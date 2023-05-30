@@ -4,7 +4,7 @@ import logging
 
 from fastapi import FastAPI, Depends
 
-from multikeyjwt.middleware.jwtbearer import JWTPayload, JWTBearer
+from multikeyjwt.middleware import JWTPayload, JWTBearer
 
 LOGGER = logging.getLogger(__name__)
 APP = FastAPI(docs_url="/middleware/docs", openapi_url="/middleware/openapi.json")
