@@ -2,10 +2,7 @@ name: CI
 run-name: Triggered by push from ${{ github.actor }}
 on: [push]
 jobs:
-  Pre-Commit-Check:
+  CI-Run-On-Ubuntu-Latest:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v3
-      - run: pip install mypy pylint detect-secrets
-      - uses: pre-commit/action@main
+      - uses: pvarki/ci@main
