@@ -3,6 +3,7 @@ import logging
 from pathlib import Path
 
 import pytest
+from click.testing import CliRunner
 from libadvian.logging import init_logging
 
 from multikeyjwt import Issuer, Verifier
@@ -45,3 +46,23 @@ def issuer_pc() -> Issuer:
 def verifier() -> Verifier:
     """issuer using all keys in data"""
     return Verifier(pubkeypath=DATA_PATH)
+
+
+@pytest.fixture(scope="module")
+def runner() -> CliRunner:
+    """CLI runner"""
+    return CliRunner()
+
+
+@pytest.fixture(scope="function")
+def token(tmp_path: Path) -> Path:
+    """Token fixture"""
+    iss = Issuer(
+        privkeypath=DATA_PATH / Path("rr_jwtRS256.key"),
+        keypasswd=Secret("Rimmed_Radiated_Pliable_Perjury"),  # pragma: allowlist secret
+    )
+
+    tokenfile = tmp_path / "token.txt"
+    tokenfile.write_text(iss.issue({"foo": "bar"}))
+
+    return tokenfile
