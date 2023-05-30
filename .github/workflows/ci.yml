@@ -12,4 +12,4 @@ jobs:
       - run: docker build --ssh default --target tox -t multikeyjwt:tox .
       - name: Echo SSH_AUTH_SOCK
         run: echo $SSH_AUTH_SOCK
-      - run: docker run --rm -it -v ${{ github.workspace }}:/app -v $SSH_AUTH_SOCK:$SSH_AUTH_SOCK -e SSH_AUTH_SOCK multikeyjwt:tox
+      - run: docker run --rm -v ${{ github.workspace }}:/app -v $SSH_AUTH_SOCK:$SSH_AUTH_SOCK -e SSH_AUTH_SOCK multikeyjwt:tox
