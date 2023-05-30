@@ -13,7 +13,7 @@ jobs:
       - run: cat /etc/alpine-release
         shell: alpine.sh {0}
       - run: docker build --ssh default --target devel_shell -t multikeyjwt:devel_shell .
-        shell: alpine.sh {0}
+#        shell: alpine.sh {0}
 
 #  Build-On-Debian:
 #    runs-on: ubuntu-latest
