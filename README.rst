@@ -4,6 +4,14 @@ multikeyjwt
 
 Verify JWTs with multiple public keys, FastAPI middleware for auth
 
+Creating signing keys
+---------------------
+
+.. code-block:: bash
+
+    echo "My very g00d Passphrase" >/tmp/jwtRS256_passphrase.txt
+    ./make_keypair.sh
+
 
 Docker
 ------
