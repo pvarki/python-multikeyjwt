@@ -30,4 +30,4 @@ jobs:
         uses: actions/checkout@v3
       - name: List files in the repository
         run: ls ${{ github.workspace }}
-      - run: docker build --ssh default --target devel_shell -t multikeyjwt:devel_shell .
+      - run: DOCKER_BUILDKIT=1 docker build --ssh default --target devel_shell -t multikeyjwt:devel_shell .
