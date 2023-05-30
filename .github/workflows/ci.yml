@@ -1,0 +1,13 @@
+name: CI
+run-name: CI triggered by push from ${{ github.actor }}
+on: [push]
+jobs:
+  Build-On-Ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: List files in the repository
+        run: ls ${{ github.workspace }}
+      - run: docker build --ssh default --target tox -t multikeyjwt:tox .
+      - run: docker run --rm -it -v `pwd`":/app" `echo $DOCKER_SSHAGENT` multikeyjwt:tox
