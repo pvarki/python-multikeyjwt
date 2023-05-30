@@ -12,8 +12,6 @@ jobs:
         
       - run: cat /etc/alpine-release
         shell: alpine.sh {0}
-      - run: docker build --ssh default --target devel_shell -t multikeyjwt:devel_shell .
-#        shell: alpine.sh {0}
 
 #  Build-On-Debian:
 #    runs-on: ubuntu-latest
@@ -24,3 +22,12 @@ jobs:
 #          DEB_BUILD_OPTIONS: noautodbgsym
 #        with:
 #          buildpackage-opts: --build=binary --no-sign
+
+  Build-On-Ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: List files in the repository
+        run: ls ${{ github.workspace }}
+      - run: docker build --ssh default --target devel_shell -t multikeyjwt:devel_shell .
