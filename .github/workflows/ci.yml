@@ -33,5 +33,5 @@ jobs:
       - name: Docker build
         run: |
           export DOCKER_BUILDKIT=1
-          export DOCKER_SSHAGENT="-v $SSH_AUTH_SOCK:$SSH_AUTH_SOCK -e SSH_AUTH_SOCK"
+          export DOCKER_SSHAGENT="-v /run/host-services/ssh-auth.sock:/run/host-services/ssh-auth.sock -e SSH_AUTH_SOCK=/run/host-services/ssh-auth.sock"
           docker build --ssh default --target devel_shell -t multikeyjwt:devel_shell .
