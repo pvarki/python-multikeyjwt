@@ -1,5 +1,5 @@
 """Creator/signer aka issuer for JWTs"""
-from typing import Optional, Any, Dict
+from typing import Optional, Any, Dict, cast
 from dataclasses import dataclass, field
 from pathlib import Path
 import functools
@@ -52,7 +52,7 @@ class Issuer:
             claims["iss"] = self.config.issuer
         if self.config.audience:
             claims["aud"] = self.config.audience
-        return pyJWT.encode(payload=claims, key=self._privkey, algorithm=self.config.algorithm)
+        return pyJWT.encode(payload=claims, key=cast(Any, self._privkey), algorithm=self.config.algorithm)
 
     @classmethod
     def singleton(cls, **kwargs: Any) -> "Issuer":
