@@ -5,4 +5,4 @@ jobs:
   CI-Run-On-Ubuntu-Latest:
     runs-on: ubuntu-latest
     steps:
-      - uses: pvarki/ci@main
+      - uses: pvarki/ci@test/poetry
