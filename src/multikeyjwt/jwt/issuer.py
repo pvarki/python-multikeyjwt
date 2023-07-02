@@ -1,5 +1,5 @@
 """Creator/signer aka issuer for JWTs"""
-from typing import Optional, Any, Dict, cast
+from typing import Optional, Any, Dict, cast, ClassVar
 from dataclasses import dataclass, field
 from pathlib import Path
 import functools
@@ -28,6 +28,7 @@ class Issuer:
 
     # Private props
     _privkey: PrivateKeyTypes = field(init=False, repr=False)
+    _singleton: ClassVar[Optional["Issuer"]] = None
 
     def __post_init__(self) -> None:
         """Read the keys"""
@@ -57,11 +58,7 @@ class Issuer:
     @classmethod
     def singleton(cls, **kwargs: Any) -> "Issuer":
         """Get a singleton"""
-        global ISSUER_SINGLETON  # pylint: disable=W0603
-        if ISSUER_SINGLETON is None:
-            ISSUER_SINGLETON = Issuer(**kwargs)
-        assert ISSUER_SINGLETON is not None
-        return ISSUER_SINGLETON
-
-
-ISSUER_SINGLETON: Optional[Issuer] = None
+        if Issuer._singleton is None:
+            Issuer._singleton = Issuer(**kwargs)
+        assert Issuer._singleton is not None
+        return Issuer._singleton
