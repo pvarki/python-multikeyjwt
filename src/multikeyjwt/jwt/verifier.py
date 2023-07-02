@@ -1,5 +1,5 @@
 """Verifier for JWTs, using multiple public keys"""
-from typing import Optional, Any, Dict, MutableSequence
+from typing import Optional, Any, Dict, MutableSequence, ClassVar
 from dataclasses import dataclass, field
 from pathlib import Path
 import functools
@@ -27,6 +27,9 @@ class Verifier:
 
     # Non-init public props
     pubkeys: MutableSequence[PublicKeyTypes] = field(init=False)
+
+    # private
+    _singleton: ClassVar[Optional["Verifier"]] = None
 
     def __post_init__(self) -> None:
         """Read the keys"""
@@ -61,11 +64,7 @@ class Verifier:
     @classmethod
     def singleton(cls, **kwargs: Any) -> "Verifier":
         """Get a singleton"""
-        global VERIFIER_SINGLETON  # pylint: disable=W0603
-        if VERIFIER_SINGLETON is None:
-            VERIFIER_SINGLETON = Verifier(**kwargs)
-        assert VERIFIER_SINGLETON is not None
-        return VERIFIER_SINGLETON
-
-
-VERIFIER_SINGLETON: Optional[Verifier] = None
+        if Verifier._singleton is None:
+            Verifier._singleton = Verifier(**kwargs)
+        assert Verifier._singleton is not None
+        return Verifier._singleton

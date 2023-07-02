@@ -1,9 +1,10 @@
 """Test CLI scripts"""
 import asyncio
 import json
+import uuid
+from pathlib import Path
 
 import pytest
-
 from libadvian.binpackers import ensure_str
 
 from multikeyjwt import __version__
@@ -39,3 +40,14 @@ def test_sign_cli(runner):  # type: ignore
     result = runner.invoke(cli, ["sign", "tests/data/rr_jwtRS256.key", "-p", "Rimmed_Radiated_Pliable_Perjury"])
 
     assert result.exit_code == 0
+
+
+def test_genkey_cli(runner, nice_tmpdir):  # type: ignore
+    """Test genkey-command"""
+    keypath = Path(nice_tmpdir) / Path("gentest.key")
+    password = str(uuid.uuid4())
+    result = runner.invoke(cli, ["genkey", str(keypath), "-p", password])
+    assert result.exit_code == 0
+
+    result2 = runner.invoke(cli, ["sign", str(keypath), "-p", password])
+    assert result2.exit_code == 0
