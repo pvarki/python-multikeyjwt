@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 from click.testing import CliRunner
 from libadvian.logging import init_logging
+from libadvian.testhelpers import nice_tmpdir  # pylint: disable=W0611
 
 from multikeyjwt import Issuer, Verifier
 from multikeyjwt.config import Secret
