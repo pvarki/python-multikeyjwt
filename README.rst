@@ -9,9 +9,9 @@ Creating signing keys
 
 .. code-block:: bash
 
-    echo "My very g00d Passphrase" >/tmp/jwtRS256_passphrase.txt
-    ./make_keypair.sh
+    multikeyjwt genkey ./jwtsign.key
 
+see --help for more info
 
 Docker
 ------
