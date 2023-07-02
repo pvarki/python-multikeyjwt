@@ -1,9 +1,9 @@
 """CLI entrypoints for multikeyjwt"""
+from typing import Any, Sequence
 import logging
 import json
 from pathlib import Path
 from tempfile import NamedTemporaryFile
-from typing import Any, Sequence
 
 import click
 from jwt import InvalidSignatureError
@@ -11,6 +11,7 @@ from libadvian.logging import init_logging
 
 from multikeyjwt import __version__, Issuer, Verifier
 from multikeyjwt.config import Secret
+from multikeyjwt.keygen import generate_keypair
 
 
 LOGGER = logging.getLogger(__name__)
@@ -68,7 +69,7 @@ def verify_cmd(token: str, keypath: Path) -> None:
 @click.option("-c", "--claim", help="Claim to issue JWT with", type=(str, str), multiple=True)
 def sign_cmd(keypath: str, passphrase: str, claim: Sequence[Any]) -> None:
     """
-    Sign the given key
+    Sign the given claims
 
     The key can be piped from stdin: cat mykey.key | multikeyjwt sign -p
       mypassphrase -c key value -c secondkey secondvalue \n
@@ -103,6 +104,20 @@ def sign_cmd(keypath: str, passphrase: str, claim: Sequence[Any]) -> None:
 
         except Exception as exc:  # pylint: disable=broad-except
             return click.echo(f"{exc}")
+
+
+@cli_group.command(name="genkey")
+@click.argument("keypath", required=True)
+@click.option(
+    "-p", "--passphrase", help="Passhphrase to use", prompt=True, hide_input=True, confirmation_prompt=True, default=""
+)
+def genkey_cmd(keypath: str, passphrase: str) -> None:
+    """
+    Generate a new keypair, give the path you wish the .key -file have
+    """
+    genkey, genpub = generate_keypair(Path(keypath), passphrase)
+    click.echo(genkey)
+    click.echo(genpub)
 
 
 def multikeyjwt_cli() -> None:
