@@ -4,6 +4,9 @@ multikeyjwt
 
 Verify JWTs with multiple public keys, FastAPI middleware for auth
 
+NOTE: Due to https://github.com/encode/starlette/discussions/2446 .env file is no longer
+supported for configuration.
+
 Creating signing keys
 ---------------------
 

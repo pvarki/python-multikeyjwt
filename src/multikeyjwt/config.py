@@ -7,7 +7,7 @@ try:
     from starlette.config import Config
     from starlette.datastructures import Secret
 
-    _CONFIG = Config(".env")
+    _CONFIG = Config()  # not supporting .env files anymore because https://github.com/encode/starlette/discussions/2446
 
     def starlette_config_wrapper(
         key: str,
@@ -54,7 +54,7 @@ except ImportError:
         ) -> typing.Any:
             if cast is None or value is None:
                 return value
-            if cast is bool and isinstance(value, str):  # type: ignore
+            if cast is bool and isinstance(value, str):
                 mapping = {"true": True, "1": True, "false": False, "0": False}
                 value = value.lower()
                 if value not in mapping:
