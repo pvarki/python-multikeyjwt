@@ -7,7 +7,7 @@ try:
     from starlette.config import Config
     from starlette.datastructures import Secret
 
-    _CONFIG = Config(".env")
+    _CONFIG = Config()  # not supporting .env files anymore because https://github.com/encode/starlette/discussions/2446
 
     def starlette_config_wrapper(
         key: str,
