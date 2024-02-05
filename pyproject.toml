@@ -73,15 +73,15 @@ all = ["fastapi"]
 
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^7.1"
-coverage = "^6.3"
-pytest-cov = "^3.0"
-pylint = "^2.13"
-black = "^22.3"
+pytest = "^7.4"
+coverage = "^7.3"
+pytest-cov = "^4.1"
+pylint = "^2.17"
+black = "^23.7"
 bandit = "^1.7"
-mypy = "^0.942"
-pre-commit = "^2.17"
-pytest-asyncio = "^0.18"
+mypy = "^1.5"
+pre-commit = "^3.3"
+pytest-asyncio = ">=0.21,<1.0" # caret behaviour on 0.x is to lock to 0.x.*
 bump2version = "^1.0"
 detect-secrets = "^1.2"
 fastapi = {version=">0.89,<1.0", optional = false} # required for testing
