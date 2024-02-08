@@ -42,13 +42,16 @@ class Verifier:
                     continue
                 if not fpth.name.endswith(".pub"):
                     continue
-                LOGGER.debug("Loading key {}".format(fpth))
-                with fpth.open("rb") as fpntr:
-                    self.pubkeys.append(serialization.load_pem_public_key(fpntr.read(), backend=default_backend()))
+                self.load_key(fpth)
         else:
             LOGGER.info("Loading key {}".format(self.pubkeypath))
             with self.pubkeypath.open("rb") as fpntr:
                 self.pubkeys = [serialization.load_pem_public_key(fpntr.read(), backend=default_backend())]
+
+    def load_key(self, fpth: Path) -> None:
+        """Load given file into public keys"""
+        LOGGER.debug("Loading key {}".format(fpth))
+        self.pubkeys.append(serialization.load_pem_public_key(fpth.read_bytes(), backend=default_backend()))
 
     def decode(self, token: str) -> Dict[str, Any]:
         """Decode the token"""

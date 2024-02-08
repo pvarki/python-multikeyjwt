@@ -5,6 +5,7 @@ import jwt as pyJWT  # too easy to accidentally override the module
 import pytest
 
 from multikeyjwt import Issuer, Verifier
+from .conftest import DATA_PATH
 
 LOGGER = logging.getLogger(__name__)
 
@@ -28,3 +29,14 @@ def test_pc_issued(issuer_pc: Issuer, verifier: Verifier) -> None:
     token = issuer_pc.issue({"boss": "mang"})
     with pytest.raises(pyJWT.exceptions.InvalidSignatureError):
         verifier.decode(token)
+
+
+def test_load_key(issuer_pc: Issuer) -> None:
+    """test verifier key load load after init"""
+    verifier = Verifier(pubkeypath=DATA_PATH)
+    token = issuer_pc.issue({"foo": "bar"})
+    with pytest.raises(pyJWT.exceptions.InvalidSignatureError):
+        verifier.decode(token)
+    verifier.load_key(DATA_PATH / "pc_jwtRS256.p_b")
+    decoded = verifier.decode(token)
+    assert decoded["foo"] == "bar"
