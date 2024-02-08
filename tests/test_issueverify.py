@@ -40,3 +40,15 @@ def test_load_key(issuer_pc: Issuer) -> None:
     verifier.load_key(DATA_PATH / "pc_jwtRS256.p_b")
     decoded = verifier.decode(token)
     assert decoded["foo"] == "bar"
+
+
+def test_load_key_file_uri(issuer_pc: Issuer) -> None:
+    """test verifier key load load after init"""
+    verifier = Verifier(pubkeypath=DATA_PATH)
+    token = issuer_pc.issue({"foo": "bar"})
+    with pytest.raises(pyJWT.exceptions.InvalidSignatureError):
+        verifier.decode(token)
+    keypath = DATA_PATH / "pc_jwtRS256.p_b"
+    verifier.load_key_from_url(f"file://{keypath}")
+    decoded = verifier.decode(token)
+    assert decoded["foo"] == "bar"

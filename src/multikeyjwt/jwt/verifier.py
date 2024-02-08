@@ -4,6 +4,10 @@ from dataclasses import dataclass, field
 from pathlib import Path
 import functools
 import logging
+import urllib.request
+import warnings
+import tempfile
+import ssl
 
 import jwt as pyJWT  # too easy to accidentally override the module
 from cryptography.hazmat.primitives import serialization
@@ -52,6 +56,16 @@ class Verifier:
         """Load given file into public keys"""
         LOGGER.debug("Loading key {}".format(fpth))
         self.pubkeys.append(serialization.load_pem_public_key(fpth.read_bytes(), backend=default_backend()))
+
+    def load_key_from_url(self, url: str, timeout: float = 2.0, ssl_ctx: Optional[ssl.SSLContext] = None) -> None:
+        """Save the url into a temporary file and load it"""
+        if not url.startswith("https://") and not url.startswith("file://"):
+            warnings.warn(f"Non-file {url} does not start with https")
+        with urllib.request.urlopen(url, timeout=timeout, context=ssl_ctx) as response:  # nosec
+            with tempfile.NamedTemporaryFile() as fpntr:
+                fpntr.write(response.read())
+                fpntr.flush()
+                self.load_key(Path(fpntr.name))
 
     def decode(self, token: str) -> Dict[str, Any]:
         """Decode the token"""
