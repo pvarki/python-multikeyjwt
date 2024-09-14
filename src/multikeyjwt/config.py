@@ -11,7 +11,7 @@ try:
 
     def starlette_config_wrapper(
         key: str,
-        default: typing.Optional[str] = None,
+        default: typing.Optional[typing.Any] = None,
         cast: typing.Optional[typing.Callable[[typing.Any], typing.Any]] = None,
     ) -> typing.Any:
         """Wrap starlettes config to keep type-checking sane with the missing starlette -case"""
