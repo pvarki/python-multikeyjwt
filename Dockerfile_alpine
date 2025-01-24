@@ -2,9 +2,9 @@
 #############################################
 # Tox testsuite for multiple python version #
 #############################################
-FROM advian/tox-base:alpine-3.18 as tox
-ARG PYTHON_VERSIONS="3.11 3.10 3.9 3.8"
-ARG POETRY_VERSION="1.5.1"
+FROM advian/tox-base:alpine-3.19 as tox
+ARG PYTHON_VERSIONS="3.11 3.10 3.9"
+ARG POETRY_VERSION="2.0.1"
 RUN export RESOLVED_VERSIONS=`pyenv_resolve $PYTHON_VERSIONS` \
     && echo RESOLVED_VERSIONS=$RESOLVED_VERSIONS \
     && for pyver in $RESOLVED_VERSIONS; do pyenv install -s $pyver; done \
@@ -18,7 +18,7 @@ RUN export RESOLVED_VERSIONS=`pyenv_resolve $PYTHON_VERSIONS` \
 ######################
 # Base builder image #
 ######################
-FROM python:3.11-alpine3.18 as builder_base
+FROM python:3.11-alpine3.19 as builder_base
 
 ENV \
   # locale
@@ -32,7 +32,7 @@ ENV \
   PIP_DISABLE_PIP_VERSION_CHECK=on \
   PIP_DEFAULT_TIMEOUT=100 \
   # poetry:
-  POETRY_VERSION=1.5.1
+  POETRY_VERSION=2.0.1
 
 
 RUN apk add --no-cache \
@@ -64,6 +64,7 @@ WORKDIR /pysetup
 COPY ./poetry.lock ./pyproject.toml /pysetup/
 # Install basic requirements (utilizing an internal docker wheelhouse if available)
 RUN --mount=type=ssh pip3 install wheel virtualenv \
+    && poetry self add poetry-plugin-export \
     && poetry export -f requirements.txt --without-hashes -o /tmp/requirements.txt \
     && pip3 wheel --wheel-dir=/tmp/wheelhouse -r /tmp/requirements.txt \
     && virtualenv /.venv && source /.venv/bin/activate && echo 'source /.venv/bin/activate' >>/root/.profile \
@@ -91,7 +92,7 @@ RUN --mount=type=ssh source /.venv/bin/activate \
 #########################
 # Main production build #
 #########################
-FROM python:3.11-alpine3.18 as production
+FROM python:3.11-alpine3.19 as production
 COPY --from=production_build /tmp/wheelhouse /tmp/wheelhouse
 COPY --from=production_build /docker-entrypoint.sh /docker-entrypoint.sh
 WORKDIR /app
@@ -114,7 +115,8 @@ ENTRYPOINT ["/sbin/tini", "--", "/docker-entrypoint.sh"]
 #####################################
 FROM builder_base as devel_build
 # Install deps
-WORKDIR /pysetup
+COPY . /app
+WORKDIR /app
 RUN --mount=type=ssh source /.venv/bin/activate \
     && poetry install --no-interaction --no-ansi \
     && true
