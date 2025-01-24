@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "multikeyjwt"
-version = "1.4.2"
+version = "1.4.3"
 description = "Verify JWTs with multiple public keys, FastAPI middleware for auth"
 authors = ["Eero af Heurlin <eero.afheurlin@iki.fi>"]
 homepage = "https://github.com/pvarki/python-multikeyjwt/"
