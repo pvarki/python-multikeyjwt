@@ -115,7 +115,8 @@ ENTRYPOINT ["/sbin/tini", "--", "/docker-entrypoint.sh"]
 #####################################
 FROM builder_base as devel_build
 # Install deps
-WORKDIR /pysetup
+COPY . /app
+WORKDIR /app
 RUN --mount=type=ssh source /.venv/bin/activate \
     && poetry install --no-interaction --no-ansi \
     && true
