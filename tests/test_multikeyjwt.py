@@ -5,4 +5,4 @@ from multikeyjwt import __version__
 
 def test_version() -> None:
     """Make sure version matches expected"""
-    assert __version__ == "1.4.4"
+    assert __version__ == "1.5.0"
