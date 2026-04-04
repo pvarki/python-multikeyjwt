@@ -22,7 +22,7 @@ jobs:
       checks: write
     strategy:
       matrix:
-        python-version: ["3.11", "3.10", "3.9"] # , "3.12"]
+        python-version: ["3.11", "3.10"] # , "3.12"]
     env:
       PIP_INDEX_URL: https://nexus.dev.pvarki.fi/repository/python/simple
       POETRY_PYPI_MIRROR_URL: https://nexus.dev.pvarki.fi/repository/python/simple
