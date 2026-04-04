@@ -1,4 +1,5 @@
 """Common config etc classes"""
+
 from typing import Optional
 import functools
 from dataclasses import dataclass, field

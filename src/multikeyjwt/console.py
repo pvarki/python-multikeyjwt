@@ -1,4 +1,5 @@
 """CLI entrypoints for multikeyjwt"""
+
 from typing import Any, Sequence
 import logging
 import json

@@ -1,4 +1,5 @@
 """FastAPI auth middleware for JWT bearer auth"""
+
 from typing import Optional, Any, Mapping
 import logging
 

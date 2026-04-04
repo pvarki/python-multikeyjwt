@@ -1,4 +1,5 @@
 """pytest automagics"""
+
 import logging
 from pathlib import Path
 

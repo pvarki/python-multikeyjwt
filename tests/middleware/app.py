@@ -1,4 +1,5 @@
 """Quick and dirty fastapi test app"""
+
 from typing import Mapping
 import logging
 

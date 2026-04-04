@@ -1,4 +1,5 @@
 """Package level tests"""
+
 from multikeyjwt import __version__
 
 
