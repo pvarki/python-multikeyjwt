@@ -1,4 +1,5 @@
 """Verifier for JWTs, using multiple public keys"""
+
 from typing import Optional, Any, Dict, MutableSequence, ClassVar
 from dataclasses import dataclass, field
 from pathlib import Path

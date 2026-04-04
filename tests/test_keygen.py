@@ -1,4 +1,5 @@
 """Test the key generation helper"""
+
 import logging
 from pathlib import Path
 import uuid

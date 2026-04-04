@@ -1,4 +1,5 @@
 """Creator/signer aka issuer for JWTs"""
+
 from typing import Optional, Any, Dict, cast, ClassVar
 from dataclasses import dataclass, field
 from pathlib import Path

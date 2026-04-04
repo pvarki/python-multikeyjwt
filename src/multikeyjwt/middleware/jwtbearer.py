@@ -1,4 +1,5 @@
 """FastAPI auth middleware for JWT bearer auth"""
+
 from typing import Optional, Any, Mapping
 import logging
 
@@ -24,10 +25,14 @@ class JWTBearer(HTTPBearer):  # pylint: disable=R0903
             if cookie := request.cookies.get(cookie_name):
                 jwt_b64 = cookie
         if not jwt_b64:
-            credentials: Optional[HTTPAuthorizationCredentials] = await super().__call__(request)
+            try:
+                credentials: Optional[HTTPAuthorizationCredentials] = await super().__call__(request)
+            except HTTPException as parent_error:
+                credentials = None
+                if parent_error.status_code not in (401, 403):
+                    raise parent_error
             if not credentials:
-                # auto-error will have raised already if no auth header
-                return None
+                raise HTTPException(status_code=403, detail="No authentication")
             if credentials.scheme != "Bearer":
                 raise HTTPException(status_code=403, detail="Invalid authentication scheme.")
             jwt_b64 = credentials.credentials

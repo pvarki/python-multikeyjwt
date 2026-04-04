@@ -1,4 +1,5 @@
 """Test key issuing and verification"""
+
 import logging
 
 import jwt as pyJWT  # too easy to accidentally override the module

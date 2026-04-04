@@ -1,4 +1,5 @@
 """Config helper"""
+
 import typing
 import os
 

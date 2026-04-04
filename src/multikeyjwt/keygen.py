@@ -1,4 +1,5 @@
 """Generate keypairs"""
+
 from typing import Tuple, Union
 from pathlib import Path
 import logging
