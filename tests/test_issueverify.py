@@ -53,3 +53,9 @@ def test_load_key_file_uri(issuer_pc: Issuer) -> None:
     verifier.load_key_from_url(f"file://{keypath}")
     decoded = verifier.decode(token)
     assert decoded["foo"] == "bar"
+
+
+def test_load_edkey() -> None:
+    """test verifier does not load ED25519 key"""
+    verifier = Verifier(pubkeypath=DATA_PATH / "ed25519.pub")
+    assert not verifier.pubkeys
