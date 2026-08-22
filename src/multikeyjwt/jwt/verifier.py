@@ -75,7 +75,7 @@ class Verifier:
         last_exception = Exception("This should not be raised")
         for pubkey in self.pubkeys:
             try:
-                return pyJWT.decode(jwt=token, key=pubkey, algorithms=[self.config.algorithm])  # type: ignore
+                return pyJWT.decode(jwt=token, key=pubkey, algorithms=[self.config.algorithm])
             except pyJWT.InvalidSignatureError as exc:
                 last_exception = exc
                 continue
