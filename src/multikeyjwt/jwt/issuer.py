@@ -9,7 +9,7 @@ import pendulum
 from libadvian.binpackers import ensure_utf8
 import jwt as pyJWT  # too easy to accidentally override the module
 from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.primitives.asymmetric.types import PrivateKeyTypes
+from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey
 from cryptography.hazmat.backends import default_backend
 
 
@@ -28,7 +28,7 @@ class Issuer:
     )
 
     # Private props
-    _privkey: PrivateKeyTypes = field(init=False, repr=False)
+    _privkey: RSAPrivateKey = field(init=False, repr=False)
     _singleton: ClassVar[Optional["Issuer"]] = None
 
     def __post_init__(self) -> None:
@@ -38,9 +38,10 @@ class Issuer:
                 passphrase: Optional[bytes] = None
                 if self.keypasswd:
                     passphrase = ensure_utf8(str(self.keypasswd))
-                self._privkey = serialization.load_pem_private_key(
-                    fpntr.read(), password=passphrase, backend=default_backend()
-                )
+                key = serialization.load_pem_private_key(fpntr.read(), password=passphrase, backend=default_backend())
+                if not isinstance(key, RSAPrivateKey):
+                    raise ValueError("{} is not RSAPrivateKey".format(self.privkeypath))
+                self._privkey = key
         else:
             raise ValueError("No private key, cannot issue")
 

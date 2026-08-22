@@ -12,7 +12,7 @@ import ssl
 
 import jwt as pyJWT  # too easy to accidentally override the module
 from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.primitives.asymmetric.types import PublicKeyTypes
+from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicKey
 from cryptography.hazmat.backends import default_backend
 
 
@@ -31,7 +31,7 @@ class Verifier:
     pubkeypath: Path = field(default_factory=functools.partial(ENVCONFIG, "JWT_PUBKEY_PATH", cast=Path))
 
     # Non-init public props
-    pubkeys: MutableSequence[PublicKeyTypes] = field(init=False)
+    pubkeys: MutableSequence[RSAPublicKey] = field(init=False)
 
     # private
     _singleton: ClassVar[Optional["Verifier"]] = None
@@ -49,14 +49,16 @@ class Verifier:
                     continue
                 self.load_key(fpth)
         else:
-            LOGGER.info("Loading key {}".format(self.pubkeypath))
-            with self.pubkeypath.open("rb") as fpntr:
-                self.pubkeys = [serialization.load_pem_public_key(fpntr.read(), backend=default_backend())]
+            self.load_key(self.pubkeypath)
 
     def load_key(self, fpth: Path) -> None:
         """Load given file into public keys"""
         LOGGER.debug("Loading key {}".format(fpth))
-        self.pubkeys.append(serialization.load_pem_public_key(fpth.read_bytes(), backend=default_backend()))
+        key = serialization.load_pem_public_key(fpth.read_bytes(), backend=default_backend())
+        if not isinstance(key, RSAPublicKey):
+            LOGGER.warning("{} is not RSAPublicKey, skipping".format(fpth))
+            return
+        self.pubkeys.append(key)
 
     def load_key_from_url(self, url: str, timeout: float = 2.0, ssl_ctx: Optional[ssl.SSLContext] = None) -> None:
         """Save the url into a temporary file and load it"""
