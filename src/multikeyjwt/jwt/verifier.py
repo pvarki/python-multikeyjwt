@@ -49,6 +49,7 @@ class Verifier:
                     continue
                 self.load_key(fpth)
         else:
+            self.pubkeys = []
             self.load_key(self.pubkeypath)
 
     def load_key(self, fpth: Path) -> None:
