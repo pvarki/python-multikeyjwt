@@ -15,7 +15,7 @@ KPTYPE = rsa.RSAPrivateKey | ec.EllipticCurvePrivateKey
 
 
 def generate_keypair(
-    keyname: Path, password: Union[str, bytes, None], ktype: str = "RSA", ksize: int = 4096
+    keyname: Path, password: Union[str, bytes, None], ktype: str = "SECP256R1", ksize: int = 4096
 ) -> Tuple[Path, Path]:
     """Generate a keypair, give the path name of the .key -file and password, returns paths of
     .key and .pub"""
