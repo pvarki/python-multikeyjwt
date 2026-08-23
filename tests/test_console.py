@@ -47,7 +47,7 @@ def test_genkey_cli(runner, nice_tmpdir):  # type: ignore
     """Test genkey-command"""
     keypath = Path(nice_tmpdir) / Path("gentest.key")
     password = str(uuid.uuid4())
-    result = runner.invoke(cli, ["genkey", str(keypath), "-p", password])
+    result = runner.invoke(cli, ["genkey", str(keypath), "-p", password, "-t", "EC"])
     assert result.exit_code == 0
 
     result2 = runner.invoke(cli, ["sign", str(keypath), "-p", password])

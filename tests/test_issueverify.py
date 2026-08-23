@@ -25,6 +25,13 @@ def test_cl_issued(issuer_cl: Issuer, verifier: Verifier) -> None:
     assert decoded["racket"] == "Raccoon"
 
 
+def test_es_issued(issuer_es: Issuer, verifier: Verifier) -> None:
+    """Test that we can issue and verify ES256 JWTs"""
+    token = issuer_es.issue({"baratna": "best"})
+    decoded = verifier.decode(token)
+    assert decoded["baratna"] == "best"
+
+
 def test_pc_issued(issuer_pc: Issuer, verifier: Verifier) -> None:
     """Test that we can issue but not verify cl-signed JWTs"""
     token = issuer_pc.issue({"boss": "mang"})

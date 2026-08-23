@@ -112,11 +112,12 @@ def sign_cmd(keypath: str, passphrase: str, claim: Sequence[Any]) -> None:
 @click.option(
     "-p", "--passphrase", help="Passhphrase to use", prompt=True, hide_input=True, confirmation_prompt=True, default=""
 )
-def genkey_cmd(keypath: str, passphrase: str) -> None:
+@click.option("-t", "--keytype", help="Key type", default="RSA")
+def genkey_cmd(keypath: str, passphrase: str, keytype: str) -> None:
     """
     Generate a new keypair, give the path you wish the .key -file have
     """
-    genkey, genpub = generate_keypair(Path(keypath), passphrase)
+    genkey, genpub = generate_keypair(Path(keypath), passphrase, ktype=keytype)
     click.echo(genkey)
     click.echo(genpub)
 

@@ -45,6 +45,15 @@ def issuer_pc() -> Issuer:
 
 
 @pytest.fixture(scope="session")
+def issuer_es() -> Issuer:
+    """issuer using pc-key"""
+    return Issuer(
+        privkeypath=DATA_PATH / Path("ci_jwtES256.key"),
+        keypasswd=Secret("Exemplify_Unblessed_Nastiness_Reanalyze"),  # pragma: allowlist secret
+    )
+
+
+@pytest.fixture(scope="session")
 def verifier() -> Verifier:
     """issuer using all keys in data"""
     return Verifier(pubkeypath=DATA_PATH)
