@@ -13,8 +13,6 @@ JWT_DEFAULT_LIFETIME = 60 * 60 * 2  # 2 hours in seconds
 class JWTVerifierConfig:
     """Config options for jwt decode"""
 
-    algorithm: str = field(default_factory=functools.partial(ENVCONFIG, "JWT_ALGORITHM", default="RS256"))
-
 
 @dataclass
 class JWTIssuerConfig(JWTVerifierConfig):

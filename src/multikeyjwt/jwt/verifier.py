@@ -12,7 +12,7 @@ import ssl
 
 import jwt as pyJWT  # too easy to accidentally override the module
 from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicKey
+from cryptography.hazmat.primitives.asymmetric import rsa, ec
 from cryptography.hazmat.backends import default_backend
 
 
@@ -31,7 +31,7 @@ class Verifier:
     pubkeypath: Path = field(default_factory=functools.partial(ENVCONFIG, "JWT_PUBKEY_PATH", cast=Path))
 
     # Non-init public props
-    pubkeys: MutableSequence[RSAPublicKey] = field(init=False)
+    pubkeys: MutableSequence[rsa.RSAPublicKey | ec.EllipticCurvePublicKey] = field(init=False)
 
     # private
     _singleton: ClassVar[Optional["Verifier"]] = None
@@ -56,8 +56,8 @@ class Verifier:
         """Load given file into public keys"""
         LOGGER.debug("Loading key {}".format(fpth))
         key = serialization.load_pem_public_key(fpth.read_bytes(), backend=default_backend())
-        if not isinstance(key, RSAPublicKey):
-            LOGGER.warning("{} is not RSAPublicKey, skipping".format(fpth))
+        if not isinstance(key, (rsa.RSAPublicKey, ec.EllipticCurvePublicKey)):
+            LOGGER.warning("{} is not RSAPublicKey or EllipticCurvePublicKey, skipping".format(fpth))
             return
         self.pubkeys.append(key)
 
@@ -76,8 +76,10 @@ class Verifier:
         last_exception = Exception("This should not be raised")
         for pubkey in self.pubkeys:
             try:
-                return pyJWT.decode(jwt=token, key=pubkey, algorithms=[self.config.algorithm])
-            except pyJWT.InvalidSignatureError as exc:
+                if isinstance(pubkey, ec.EllipticCurvePublicKey):
+                    return pyJWT.decode(jwt=token, key=pubkey, algorithms=["ES256"])
+                return pyJWT.decode(jwt=token, key=pubkey, algorithms=["RS256"])
+            except (pyJWT.InvalidSignatureError, pyJWT.InvalidAlgorithmError) as exc:
                 last_exception = exc
                 continue
         raise last_exception

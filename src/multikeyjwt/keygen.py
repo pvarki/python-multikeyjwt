@@ -6,20 +6,31 @@ import logging
 
 
 from libadvian.binpackers import ensure_utf8
-from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.primitives.asymmetric import rsa, ec
 from cryptography.hazmat.primitives import serialization
 
 
 LOGGER = logging.getLogger(__name__)
+KPTYPE = rsa.RSAPrivateKey | ec.EllipticCurvePrivateKey
 
 
-def generate_keypair(keyname: Path, password: Union[str, bytes, None]) -> Tuple[Path, Path]:
+def generate_keypair(
+    keyname: Path, password: Union[str, bytes, None], ktype: str = "SECP256R1", ksize: int = 4096
+) -> Tuple[Path, Path]:
     """Generate a keypair, give the path name of the .key -file and password, returns paths of
     .key and .pub"""
-    keypair = rsa.generate_private_key(
-        public_exponent=65537,  # see https://www.daemonology.net/blog/2009-06-11-cryptographic-right-answers.html
-        key_size=4096,
-    )
+    if ktype in ("ECDSA", "EC"):
+        LOGGER.info("Chose SECP256R1 for generic EC keypair")
+        ktype = "SECP256R1"
+    ckp: KPTYPE | None = None
+    if ktype == "RSA":
+        LOGGER.info("Generating {} keypair of size {}, this will take a moment".format(ktype, ksize))
+        ckp = rsa.generate_private_key(public_exponent=65537, key_size=ksize)
+    elif ktype in ("SECP256R1",):
+        LOGGER.info("Generating {} keypair".format(ktype))
+        ckp = ec.generate_private_key(getattr(ec, ktype)())
+    else:
+        raise NotImplementedError(f"Key type {ktype} not supported")
     keyenc: Union[serialization.NoEncryption, serialization.BestAvailableEncryption] = serialization.NoEncryption()
     if not password:
         LOGGER.warning("No password specified, keep the key extra-safe")
@@ -28,7 +39,7 @@ def generate_keypair(keyname: Path, password: Union[str, bytes, None]) -> Tuple[
 
     with keyname.open("wb") as fpntr:
         fpntr.write(
-            keypair.private_bytes(
+            ckp.private_bytes(
                 encoding=serialization.Encoding.PEM,
                 format=serialization.PrivateFormat.PKCS8,
                 encryption_algorithm=keyenc,
@@ -39,7 +50,7 @@ def generate_keypair(keyname: Path, password: Union[str, bytes, None]) -> Tuple[
     pubname = keyname.with_suffix(".pub")
     with pubname.open("wb") as fpntr:
         fpntr.write(
-            keypair.public_key().public_bytes(
+            ckp.public_key().public_bytes(
                 encoding=serialization.Encoding.PEM,
                 format=serialization.PublicFormat.SubjectPublicKeyInfo,
             )
