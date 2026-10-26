@@ -54,9 +54,9 @@ class Issuer:
             claims["exp"] = now + pendulum.duration(seconds=self.config.lifetime)
         else:
             claims["exp"] = now + pendulum.duration(seconds=lifetime)
-        if self.config.issuer:
+        if "iss" not in claims and self.config.issuer:
             claims["iss"] = self.config.issuer
-        if self.config.audience:
+        if "aud" not in claims and self.config.audience:
             claims["aud"] = self.config.audience
         if isinstance(self._privkey, rsa.RSAPrivateKey):
             algorithm = "RS256"

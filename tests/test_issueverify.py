@@ -108,6 +108,35 @@ def test_load_edkey() -> None:
 
 @pytest.mark.parametrize("issuer_name", ["issuer_rr", "issuer_es"])
 @pytest.mark.parametrize(
+    "claims",
+    [
+        {},
+        {"iss": "custom-issuer"},
+        {"aud": "custom-audience"},
+        {"iss": "custom-issuer", "aud": "custom-audience"},
+        {"aud": ["service-a", "service-b"]},
+        {"aud": None},
+        {"iss": "", "aud": ""},
+        {"aud": []},
+    ],
+)
+def test_issue_claim_overrides(request: pytest.FixtureRequest, issuer_name: str, claims: dict[str, Any]) -> None:
+    """Explicit claims take precedence, including falsey values, without changing defaults."""
+    original: Issuer = request.getfixturevalue(issuer_name)
+    config = replace(original.config, issuer="configured-issuer", audience="configured-audience")
+    issuer = replace(original, config=config)
+    defaults = {"iss": config.issuer, "aud": config.audience}
+    expected = {**defaults, **claims}
+    token = issuer.issue(claims.copy())
+    decoded = pyJWT.decode(token, options={"verify_signature": False})
+    assert {"iss": decoded["iss"], "aud": decoded["aud"]} == expected
+    assert {"iss": config.issuer, "aud": config.audience} == defaults
+    subsequent = pyJWT.decode(issuer.issue({}), options={"verify_signature": False})
+    assert {"iss": subsequent["iss"], "aud": subsequent["aud"]} == defaults
+
+
+@pytest.mark.parametrize("issuer_name", ["issuer_rr", "issuer_es"])
+@pytest.mark.parametrize(
     "claim,expected",
     [("service-a", "service-a"), (["service-b", "service-a"], "service-a"), ("service-b", ("service-a", "service-b"))],
 )
