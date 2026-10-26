@@ -34,6 +34,42 @@ def test_es_issued(issuer_es: Issuer, verifier: Verifier) -> None:
     assert decoded["baratna"] == "best"
 
 
+@pytest.mark.parametrize("issuer_name", ["issuer_rr", "issuer_es"])
+@pytest.mark.parametrize(
+    "kwargs,expected_lifetime",
+    [
+        ({}, 3600),
+        ({"lifetime": None}, 3600),
+        ({"lifetime": 60}, 60),
+        ({"lifetime": 7200}, 7200),
+        ({"lifetime": 0}, 0),
+        ({"lifetime": -60}, -60),
+    ],
+)
+def test_issue_lifetime(
+    request: pytest.FixtureRequest,
+    verifier: Verifier,
+    issuer_name: str,
+    kwargs: dict[str, Any],
+    expected_lifetime: int,
+) -> None:
+    """Per-token lifetimes override the configured default without changing it."""
+    original: Issuer = request.getfixturevalue(issuer_name)
+    issuer = replace(original, config=replace(original.config, lifetime=3600))
+    token = issuer.issue({"sub": "lifetime-test"}, **kwargs)
+    decoded = pyJWT.decode(token, options={"verify_signature": False})
+    assert decoded["exp"] - decoded["iat"] == expected_lifetime
+    assert decoded["nbf"] == decoded["iat"]
+    if expected_lifetime <= 0:
+        with pytest.raises(pyJWT.ExpiredSignatureError):
+            verifier.decode(token)
+    else:
+        assert verifier.decode(token)["sub"] == "lifetime-test"
+    assert issuer.config.lifetime == 3600
+    default = verifier.decode(issuer.issue({"sub": "default-lifetime"}))
+    assert default["exp"] - default["iat"] == 3600
+
+
 def test_pc_issued(issuer_pc: Issuer, verifier: Verifier) -> None:
     """Test that we can issue but not verify cl-signed JWTs"""
     token = issuer_pc.issue({"boss": "mang"})

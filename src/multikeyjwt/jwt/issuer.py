@@ -45,12 +45,15 @@ class Issuer:
         else:
             raise ValueError("No private key, cannot issue")
 
-    def issue(self, claims: Dict[str, Any]) -> str:
+    def issue(self, claims: Dict[str, Any], lifetime: int | None = None) -> str:
         """Issue JWT with claims, sets some basic defaults"""
         now = pendulum.now("UTC")
         claims["nbf"] = now
         claims["iat"] = now
-        claims["exp"] = now + pendulum.duration(seconds=self.config.lifetime)
+        if lifetime is None:
+            claims["exp"] = now + pendulum.duration(seconds=self.config.lifetime)
+        else:
+            claims["exp"] = now + pendulum.duration(seconds=lifetime)
         if self.config.issuer:
             claims["iss"] = self.config.issuer
         if self.config.audience:
