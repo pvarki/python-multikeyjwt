@@ -9,6 +9,7 @@ import pytest
 from libadvian.binpackers import ensure_str
 
 from multikeyjwt import __version__
+from multikeyjwt import Issuer
 from multikeyjwt.console import cli_group as cli
 
 
@@ -34,6 +35,35 @@ def test_verify_cli(runner, token):  # type: ignore
 
     assert "foo" in json.loads(result.output)
     assert result.exit_code == 0
+
+
+@pytest.mark.parametrize(
+    "audiences,success",
+    [(("service-a",), True), (("service-b", "service-a"), True), (("service-b",), False), ((), False), (("",), False)],
+)
+def test_verify_audience_cli(runner, issuer_rr: Issuer, audiences: tuple[str, ...], success: bool):  # type: ignore
+    """CLI audiences reach verification, and failures do not expose decoded payloads."""
+    token = issuer_rr.issue({"aud": "service-a", "sub": "cli-user"})
+    arguments = ["verify", "-k", "tests/data/rr_jwtRS256.pub"]
+    for audience in audiences:
+        arguments.extend(["--audience", audience])
+    result = runner.invoke(cli, arguments, input=token)
+    assert (result.exit_code == 0) == success
+    if success:
+        assert json.loads(result.output)["sub"] == "cli-user"
+    else:
+        assert "Error:" in result.output
+        assert "cli-user" not in result.output
+        assert "Traceback" not in result.output
+
+
+def test_cli_requires_audience_claim(runner, token):  # type: ignore
+    """An expected audience must not accept a token without aud."""
+    result = runner.invoke(
+        cli, ["verify", token.read_text(), "-k", "tests/data/rr_jwtRS256.pub", "--audience", "service-a"]
+    )
+    assert result.exit_code != 0
+    assert "Error:" in result.output
 
 
 def test_sign_cli(runner):  # type: ignore

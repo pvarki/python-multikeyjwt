@@ -7,7 +7,7 @@ from pathlib import Path
 from tempfile import NamedTemporaryFile
 
 import click
-from jwt import InvalidSignatureError
+from jwt import InvalidSignatureError, InvalidAudienceError, MissingRequiredClaimError
 from libadvian.logging import init_logging
 
 from multikeyjwt import __version__, Issuer, Verifier
@@ -45,7 +45,8 @@ def cli_group(ctx: click.Context, loglevel: int, verbose: int) -> None:
 @cli_group.command(name="verify")
 @click.argument("token", callback=get_from_stdin, required=False)
 @click.option("-k", "--keypath", help="Public key path", type=click.Path(exists=True))
-def verify_cmd(token: str, keypath: Path) -> None:
+@click.option("--audience", multiple=True, help="Expected audience; repeat to accept any of several audiences.")
+def verify_cmd(token: str, keypath: Path, audience: Sequence[str]) -> None:
     """
     Verify the given token with the given key.
 
@@ -58,10 +59,12 @@ def verify_cmd(token: str, keypath: Path) -> None:
             return click.echo("No token given!")
 
         verifier = Verifier(pubkeypath=Path(keypath))
-        return click.echo(json.dumps(verifier.decode(token), indent=4))
+        return click.echo(json.dumps(verifier.decode(token, audience=audience or None), indent=4))
 
     except InvalidSignatureError:
         return click.echo("Invalid signature!", err=True)
+    except (InvalidAudienceError, MissingRequiredClaimError, ValueError) as exc:
+        raise click.ClickException(str(exc)) from exc
 
 
 @cli_group.command(name="sign")

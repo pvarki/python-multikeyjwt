@@ -7,6 +7,30 @@ Verify JWTs with multiple public keys, FastAPI middleware for auth
 NOTE: Due to https://github.com/encode/starlette/discussions/2446 .env file is no longer
 supported for configuration.
 
+Verifying audiences
+-------------------
+
+Pass an expected audience explicitly when verifying a token::
+
+    from pathlib import Path
+    from multikeyjwt import Verifier
+
+    verifier = Verifier(pubkeypath=Path("public-keys"))
+    payload = verifier.decode(token, audience="service-a")
+    payload = verifier.decode(token, audience=("service-a", "service-b"))
+
+Audience matching follows PyJWT's case-sensitive string/list rules. A supplied
+expectation requires a matching ``aud`` claim. Empty expectations are errors.
+``decode(token)`` keeps its existing behavior: tokens without an audience work,
+while a nonempty ``aud`` requires an explicit expectation. Audience verification
+is never disabled implicitly. ``JWT_AUDIENCE`` configures issuing only; it does
+not set verifier or middleware policy.
+
+The verify command accepts repeated audience options::
+
+    multikeyjwt verify -k public-keys/ --audience service-a < token.txt
+    multikeyjwt verify -k public-keys/ --audience service-a --audience service-b < token.txt
+
 Creating signing keys
 ---------------------
 
