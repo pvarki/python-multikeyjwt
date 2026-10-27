@@ -1,6 +1,6 @@
 """Verifier for JWTs, using multiple public keys"""
 
-from typing import Optional, Any, Dict, MutableSequence, ClassVar
+from typing import Optional, Any, Dict, MutableSequence, ClassVar, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
 import functools
@@ -20,6 +20,16 @@ from .common import JWTVerifierConfig
 from ..config import ENVCONFIG
 
 LOGGER = logging.getLogger(__name__)
+
+
+def validate_audience(audience: str | Sequence[str] | None) -> None:
+    """Reject empty or malformed audience expectations rather than weakening verification."""
+    if audience is not None and (
+        not isinstance(audience, (str, Sequence))
+        or not audience
+        or any(not isinstance(value, str) or not value for value in audience)
+    ):
+        raise ValueError("Audience must be a nonempty string or sequence of nonempty strings")
 
 
 @dataclass
@@ -71,14 +81,15 @@ class Verifier:
                 fpntr.flush()
                 self.load_key(Path(fpntr.name))
 
-    def decode(self, token: str) -> Dict[str, Any]:
-        """Decode the token"""
+    def decode(self, token: str, *, audience: str | Sequence[str] | None = None) -> Dict[str, Any]:
+        """Decode the token, optionally requiring a matching audience."""
+        validate_audience(audience)
         last_exception = Exception("This should not be raised")
         for pubkey in self.pubkeys:
             try:
                 if isinstance(pubkey, ec.EllipticCurvePublicKey):
-                    return pyJWT.decode(jwt=token, key=pubkey, algorithms=["ES256"])
-                return pyJWT.decode(jwt=token, key=pubkey, algorithms=["RS256"])
+                    return pyJWT.decode(jwt=token, key=pubkey, algorithms=["ES256"], audience=audience)
+                return pyJWT.decode(jwt=token, key=pubkey, algorithms=["RS256"], audience=audience)
             except (pyJWT.InvalidSignatureError, pyJWT.InvalidAlgorithmError) as exc:
                 last_exception = exc
                 continue

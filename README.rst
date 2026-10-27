@@ -7,6 +7,52 @@ Verify JWTs with multiple public keys, FastAPI middleware for auth
 NOTE: Due to https://github.com/encode/starlette/discussions/2446 .env file is no longer
 supported for configuration.
 
+Verifying audiences
+-------------------
+
+Pass an expected audience explicitly when verifying a token::
+
+    from pathlib import Path
+    from multikeyjwt import Verifier
+
+    verifier = Verifier(pubkeypath=Path("public-keys"))
+    payload = verifier.decode(token, audience="service-a")
+    payload = verifier.decode(token, audience=("service-a", "service-b"))
+
+Audience matching follows PyJWT's case-sensitive string/list rules. A supplied
+expectation requires a matching ``aud`` claim. Empty expectations are errors.
+``decode(token)`` keeps its existing behavior: tokens without an audience work,
+while a nonempty ``aud`` requires an explicit expectation. Audience verification
+is never disabled implicitly. ``JWT_AUDIENCE`` configures issuing only; it does
+not set verifier or middleware policy.
+
+The verify command accepts repeated audience options::
+
+    multikeyjwt verify -k public-keys/ --audience service-a < token.txt
+    multikeyjwt verify -k public-keys/ --audience service-a --audience service-b < token.txt
+
+FastAPI authentication
+----------------------
+
+Each dependency can set its own audience without changing the shared verifier::
+
+    from fastapi import Depends
+    from multikeyjwt.middleware import JWTBearer, JWTPayload
+
+    async def endpoint(jwt: JWTPayload = Depends(JWTBearer(audience="service-a"))):
+        return jwt
+
+An Authorization header takes precedence over the cookie configured by
+``JWT_COOKIE_NAME``. If a header is present but invalid, empty or uses another
+scheme, authentication fails; it never falls back to a valid cookie. Cookies
+are used only when the header is absent. Bearer scheme matching is case-insensitive.
+
+Compatibility changes: headers now take precedence over cookies, and
+``JWTBearer(auto_error=False)`` returns ``None`` for missing or invalid credentials.
+The default still raises HTTP 403 on authentication failure. ``request.state.jwt``
+contains the verified payload on success and ``None`` on failure. Routes requiring
+header-only authentication must additionally reject requests without a header.
+
 Creating signing keys
 ---------------------
 
